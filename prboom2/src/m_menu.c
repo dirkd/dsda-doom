@@ -76,6 +76,8 @@ extern dboolean  message_dontfuckwithme;
 
 extern dboolean chat_on;          // in heads-up code
 
+void DBG_WriteDaerikDebugDumpFrames(void);
+
 //
 // defaulted values
 //
@@ -4912,6 +4914,7 @@ dboolean M_Responder (event_t* ev) {
     if (ch == key_escape)                                     // phares
       {
       M_StartControlPanel ();
+      DBG_WriteDaerikDebugDumpFrames();
       S_StartSound(NULL,sfx_swtchn);
       return true;
       }

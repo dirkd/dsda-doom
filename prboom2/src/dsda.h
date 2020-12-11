@@ -43,4 +43,15 @@ void dsda_WriteAnalysis(void);
 int dsda_MaxKillRequirement(void);
 char* dsda_NewDemoName(void);
 
+#define DBG_MAX_DDD_FRAMES 2048
+typedef struct {
+  int gametic;
+  int evdata2, evdata3; // mouse/joystick x/y move from SDL << 4, see SDL/i_video.c I_GetEvent()
+  int mousex, mousey; // relative mouse move after accel+sens, see g_game.c G_Responder()
+  short angleturn; // ticcmd->angleturn, see g_game.c G_BuildTicCmd()
+  short carry; // angleturn fractional carry
+} dbg_ddd_frame_t;
+extern dbg_ddd_frame_t dbg_ddd_frames[DBG_MAX_DDD_FRAMES];
+extern dbg_ddd_frame_t* g_dbg_ddd_cur_frame;
+
 #endif

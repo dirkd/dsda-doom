@@ -727,6 +727,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
   cmd->forwardmove += fudgef((signed char)forward);
   cmd->sidemove += side;
 
+  g_dbg_ddd_cur_frame->carry = 0;
   if ((demorecording && !longtics) || shorttics)
   {
 	// Chocolate Doom Mouse Behaviour
@@ -737,6 +738,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 	  signed short desired_angleturn = cmd->angleturn + carry;
 	  cmd->angleturn = (desired_angleturn + 128) & 0xff00;
 	  carry = desired_angleturn - cmd->angleturn;
+          g_dbg_ddd_cur_frame->carry = carry;
 	}
 
     cmd->angleturn = (((cmd->angleturn + 128) >> 8) << 8);
@@ -753,6 +755,13 @@ void G_BuildTiccmd(ticcmd_t* cmd)
     cmd->buttons = special_event;
     special_event = 0;
   }
+
+  g_dbg_ddd_cur_frame->gametic = gametic;
+  g_dbg_ddd_cur_frame->mousex = mousex;
+  g_dbg_ddd_cur_frame->mousey = mousey;
+  g_dbg_ddd_cur_frame->angleturn = cmd->angleturn;
+  if (++g_dbg_ddd_cur_frame > &dbg_ddd_frames[DBG_MAX_DDD_FRAMES-1])
+    g_dbg_ddd_cur_frame = dbg_ddd_frames; // wrap around, don't care for clobbering tics not showing the faulty behavior
 }
 
 //
@@ -1006,6 +1015,9 @@ dboolean G_Responder (event_t* ev)
           mlooky -= (AccelerateMouse(ev->data3)*(mouseSensitivity_mlook))/10;
       else
         mousey += (AccelerateMouse(ev->data3)*(mouseSensitivity_vert))/40;
+
+        g_dbg_ddd_cur_frame->evdata2 = ev->data2;
+        g_dbg_ddd_cur_frame->evdata3 = ev->data3;
 
       return true;    // eat events
 

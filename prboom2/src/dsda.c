@@ -82,6 +82,42 @@ void dsda_DisplayNotification(const char* msg);
 void dsda_ResetMapVariables(void);
 const char* dsda_DetectCategory(void);
 
+FILE *dbg_ddd_fp;
+dbg_ddd_frame_t dbg_ddd_frames[DBG_MAX_DDD_FRAMES];
+dbg_ddd_frame_t* g_dbg_ddd_cur_frame = dbg_ddd_frames;
+
+#include "lprintf.h"
+#include "w_wad.h"
+void DBG_InitDaerikDebugDump(const char* name) {
+  int version;
+  char* filename;
+  filename = malloc(strlen(name) + 8 + 1);
+  AddDefaultExtension(strcpy(filename, name), ".ddd.txt");
+
+  dbg_ddd_fp = fopen(filename, "wb");
+
+  if (dbg_ddd_fp == NULL)
+    I_Error("dsda_InitGhostExport: failed to open %s", name);
+
+  free(filename);
+}
+
+void DBG_WriteDaerikDebugDumpFrames(void) {
+  for (dbg_ddd_frame_t* f = dbg_ddd_frames; f <= g_dbg_ddd_cur_frame; f++) {
+    // TODO handle ring buffer wraparound to get some frames from the back of the buffer
+    fprintf(dbg_ddd_fp, "%i %i %i %i %i %i %i\n",
+      f->gametic,
+      f->evdata2,
+      f->evdata3,
+      f->mousex,
+      f->mousey,
+      f->angleturn,
+      f->carry
+    );
+  }
+  fprintf(dbg_ddd_fp, "---\n");
+}
+
 void dsda_ReadCommandLine(void) {
   int p;
   
@@ -105,6 +141,8 @@ void dsda_ReadCommandLine(void) {
   if ((p = M_CheckParm("-import_ghost"))) dsda_InitGhostImport(p);
   
   if (M_CheckParm("-tas")) dsda_SetTas();
+
+  if ((p = M_CheckParm("-ddd")) && ++p < myargc) DBG_InitDaerikDebugDump(myargv[p]);
 }
 
 void dsda_DisplayNotifications(void) {
